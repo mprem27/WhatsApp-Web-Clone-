@@ -216,12 +216,12 @@ function ChatWindow({ selectedChat }) {
             <div className="absolute right-0 top-11 z-20 w-48 overflow-hidden rounded-2xl border border-orange-100 bg-white py-2 shadow-xl">
               <button className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-orange-50">
                 <Info size={17} />
-                Contact Info
+                Contact Info(CS)
               </button>
 
               <button className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-red-500 transition hover:bg-red-50">
                 <Trash2 size={17} />
-                Delete Chat
+                Delete Chat(CS)
               </button>
             </div>
           )}

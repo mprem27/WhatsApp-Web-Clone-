@@ -2,27 +2,57 @@ import bcrypt from "bcryptjs";
 import User from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 
+const formatUserResponse = (user) => ({
+  _id: user._id,
+  username: user.username,
+  fullName: user.fullName,
+  email: user.email,
+  profileImage: user.profileImage,
+  about: user.about,
+  isProfileComplete: user.isProfileComplete,
+  isOnline: user.isOnline,
+  lastSeen: user.lastSeen,
+  createdAt: user.createdAt,
+  updatedAt: user.updatedAt,
+});
+
 export const accessUser = async (req, res) => {
   try {
-    const { emailOrUsername, email, username, password } = req.body;
+    const {
+      emailOrUsername,
+      email,
+      username,
+      password,
+    } = req.body;
 
-    const loginIdentifier = emailOrUsername || email || username;
+    const loginIdentifier =
+      emailOrUsername || email || username;
 
     if (!loginIdentifier || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email/username and password are required",
+        message:
+          "Email/username and password are required",
       });
     }
 
-    const identifier = loginIdentifier.toLowerCase().trim();
+    const identifier = loginIdentifier
+      .toLowerCase()
+      .trim();
 
     let user = await User.findOne({
-      $or: [{ email: identifier }, { username: identifier }],
+      $or: [
+        { email: identifier },
+        { username: identifier },
+      ],
     });
 
     if (user) {
-      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      const isPasswordCorrect =
+        await bcrypt.compare(
+          password,
+          user.password
+        );
 
       if (!isPasswordCorrect) {
         return res.status(401).json({
@@ -33,6 +63,7 @@ export const accessUser = async (req, res) => {
 
       user.isOnline = true;
       user.lastSeen = null;
+
       await user.save();
 
       const token = generateToken(user._id);
@@ -42,21 +73,17 @@ export const accessUser = async (req, res) => {
         message: "Login successful",
         token,
         isNewUser: false,
-        profileSetupRequired: !user.username || !user.fullName,
-        user: {
-          id: user._id,
-          username: user.username,
-          fullName: user.fullName,
-          email: user.email,
-          profileImage: user.profileImage,
-          about: user.about,
-          isOnline: user.isOnline,
-          lastSeen: user.lastSeen,
-        },
+        profileSetupRequired:
+          !user.isProfileComplete,
+        user: formatUserResponse(user),
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      10
+    );
+
     const isEmail = identifier.includes("@");
 
     user = await User.create({
@@ -65,6 +92,7 @@ export const accessUser = async (req, res) => {
       password: hashedPassword,
       isOnline: true,
       lastSeen: null,
+      isProfileComplete: false,
     });
 
     const token = generateToken(user._id);
@@ -76,21 +104,12 @@ export const accessUser = async (req, res) => {
       isNewUser: true,
       profileSetupRequired: true,
       redirectTo: "profile-setup",
-      user: {
-        id: user._id,
-        username: user.username,
-        fullName: user.fullName,
-        email: user.email,
-        profileImage: user.profileImage,
-        about: user.about,
-        isOnline: user.isOnline,
-        lastSeen: user.lastSeen,
-      },
+      user: formatUserResponse(user),
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Auth failed",
+      message: "Authentication failed",
       error: error.message,
     });
   }

@@ -2,17 +2,17 @@ const onlineUsers = new Map();
 
 const socketHandler = (io) => {
   io.on("connection", (socket) => {
-    console.log("Socket connected:", socket.id);
-
     socket.on("joinRoom", (userId) => {
       if (!userId) return;
+
+      if (onlineUsers.get(userId) === socket.id) {
+        return;
+      }
 
       socket.join(userId);
       onlineUsers.set(userId, socket.id);
 
       io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-
-      console.log(`User ${userId} joined room`);
     });
 
     socket.on("sendMessage", (messageData) => {
@@ -36,19 +36,14 @@ const socketHandler = (io) => {
     });
 
     socket.on("disconnect", () => {
-      let disconnectedUserId = null;
-
       for (const [userId, socketId] of onlineUsers.entries()) {
         if (socketId === socket.id) {
-          disconnectedUserId = userId;
           onlineUsers.delete(userId);
           break;
         }
       }
 
       io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-
-      console.log("Socket disconnected:", socket.id);
     });
   });
 };

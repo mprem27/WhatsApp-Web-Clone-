@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
 import {
   MoreVertical,
   Search,
@@ -14,152 +17,272 @@ import {
 } from "../services/userService";
 import { logoutUser } from "../services/authService";
 
-const SELECTED_CHAT_KEY = "whatsapp_clone_selected_chat";
+const SELECTED_CHAT_KEY =
+  "whatsapp_clone_selected_chat";
 
 function ChatList({
   selectedChat,
   onSelectChat,
   activePage,
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [activeChat, setActiveChat] = useState("");
-  const [search, setSearch] = useState("");
-  const [chats, setChats] = useState([]);
-  const [profileUser, setProfileUser] = useState(null);
+  const [menuOpen, setMenuOpen] =
+    useState(false);
 
-  const formatUsers = (users = []) =>
-    users.map((user) => ({
-      id: user._id,
-      name: user.fullName || user.username || "Unknown User",
-      message:
-        user.about ||
-        "Hey there! I am using WhatsApp Web Clone.",
-      time: user.isOnline ? "Online" : "Offline",
-      image:
-        user.profileImage &&
-        typeof user.profileImage === "string" &&
-        user.profileImage.trim() !== ""
-          ? user.profileImage
-          : Assets.profile,
-      user,
-    }));
+  const [activeChat, setActiveChat] =
+    useState("");
 
-  const syncSelectedChatFromStorage = (formattedChats) => {
-    try {
-      const savedChat =
-        localStorage.getItem(SELECTED_CHAT_KEY);
+  const [search, setSearch] =
+    useState("");
 
-      if (!savedChat) return;
+  const [chats, setChats] =
+    useState([]);
 
-      const parsedChat = JSON.parse(savedChat);
+  const [profileUser, setProfileUser] =
+    useState(null);
 
-      const matchedChat = formattedChats.find(
-        (chat) => chat.id === parsedChat._id
-      );
+  const formatUsers = (
+    users = []
+  ) =>
+    users.map(
+      (user) => ({
+        id:
+          user._id,
+        name:
+          user.fullName ||
+          user.username ||
+          "Unknown User",
+        message:
+          user.about ||
+          "Hey there! I am using WhatsApp Web Clone.",
+        time:
+          user.isOnline
+            ? "Online"
+            : "Offline",
+        image:
+          user.profileImage &&
+          typeof user.profileImage ===
+            "string" &&
+          user.profileImage.trim() !==
+            ""
+            ? user.profileImage
+            : Assets.profile,
+        user,
+      })
+    );
 
-      if (matchedChat) {
-        setActiveChat(matchedChat.id);
-        onSelectChat?.(matchedChat.user);
-      }
-    } catch (error) {
-      console.error(
-        "Failed to restore selected chat:",
-        error
-      );
-    }
-  };
-
-  const fetchProfileData = async () => {
-    try {
-      const response = await getUserProfile();
-
-      if (response?.success) {
-        setProfileUser(response.user);
-      }
-    } catch (error) {
-      console.error(
-        "Failed to fetch profile:",
-        error
-      );
-    }
-  };
-
-  useEffect(() => {
-    const fetchUsers = async () => {
+  const syncSelectedChatFromStorage =
+    (
+      formattedChats
+    ) => {
       try {
-        const data = await getAllUsers();
-        const formattedChats = formatUsers(data.users);
+        const savedChat =
+          localStorage.getItem(
+            SELECTED_CHAT_KEY
+          );
 
-        setChats(formattedChats);
+        if (!savedChat)
+          return;
 
-        syncSelectedChatFromStorage(formattedChats);
-      } catch (error) {
+        const parsedChat =
+          JSON.parse(
+            savedChat
+          );
+
+        const matchedChat =
+          formattedChats.find(
+            (
+              chat
+            ) =>
+              chat.id ===
+              parsedChat._id
+          );
+
+        if (
+          matchedChat
+        ) {
+          setActiveChat(
+            matchedChat.id
+          );
+
+          onSelectChat?.(
+            matchedChat.user
+          );
+        }
+      } catch (
+        error
+      ) {
         console.error(
-          "Failed to fetch users:",
+          "Failed to restore selected chat:",
           error
         );
       }
     };
 
+  const fetchUsers =
+    async () => {
+      try {
+        const data =
+          await getAllUsers();
+
+        const users =
+          data?.users ||
+          [];
+
+        const formattedChats =
+          formatUsers(
+            users
+          );
+
+        setChats(
+          formattedChats
+        );
+
+        syncSelectedChatFromStorage(
+          formattedChats
+        );
+      } catch (
+        error
+      ) {
+        console.error(
+          "Failed to fetch users:",
+          error
+        );
+
+        setChats([]);
+      }
+    };
+
+  const fetchProfileData =
+    async () => {
+      try {
+        const response =
+          await getUserProfile();
+
+        if (
+          response?.success
+        ) {
+          setProfileUser(
+            response.user
+          );
+        }
+      } catch (
+        error
+      ) {
+        console.error(
+          "Failed to fetch profile:",
+          error
+        );
+      }
+    };
+
+  useEffect(() => {
     fetchUsers();
     fetchProfileData();
   }, []);
 
   useEffect(() => {
-    const handleSearch = async () => {
-      try {
-        if (!search.trim()) {
-          const data = await getAllUsers();
-          const formattedChats = formatUsers(data.users);
+    const handleSearch =
+      async () => {
+        try {
+          if (
+            !search.trim()
+          ) {
+            fetchUsers();
+            return;
+          }
 
-          setChats(formattedChats);
+          const data =
+            await searchUsers(
+              search
+            );
 
-          syncSelectedChatFromStorage(formattedChats);
-          return;
+          const users =
+            data?.users ||
+            [];
+
+          setChats(
+            formatUsers(
+              users
+            )
+          );
+        } catch (
+          error
+        ) {
+          console.error(
+            "Search failed:",
+            error
+          );
         }
+      };
 
-        const data = await searchUsers(search);
-        setChats(formatUsers(data.users));
-      } catch (error) {
-        console.error("Search failed:", error);
-      }
-    };
+    const delay =
+      setTimeout(
+        handleSearch,
+        300
+      );
 
-    const delay = setTimeout(handleSearch, 300);
-
-    return () => clearTimeout(delay);
+    return () =>
+      clearTimeout(
+        delay
+      );
   }, [search]);
 
   useEffect(() => {
-    if (selectedChat?._id) {
-      setActiveChat(selectedChat._id);
+    if (
+      selectedChat?._id
+    ) {
+      setActiveChat(
+        selectedChat._id
+      );
 
       localStorage.setItem(
         SELECTED_CHAT_KEY,
-        JSON.stringify(selectedChat)
+        JSON.stringify(
+          selectedChat
+        )
       );
     }
   }, [selectedChat]);
 
   useEffect(() => {
-    const handleStorageSync = () => {
-      try {
-        const savedChat =
-          localStorage.getItem(SELECTED_CHAT_KEY);
+    const handleStorageSync =
+      () => {
+        try {
+          const savedChat =
+            localStorage.getItem(
+              SELECTED_CHAT_KEY
+            );
 
-        if (!savedChat) return;
+          if (
+            !savedChat
+          ) {
+            setActiveChat(
+              ""
+            );
 
-        const parsedChat = JSON.parse(savedChat);
+            return;
+          }
 
-        setActiveChat(parsedChat._id);
-      } catch {
-        setActiveChat("");
-      }
-    };
+          const parsedChat =
+            JSON.parse(
+              savedChat
+            );
 
-    const refreshProfile = () => {
-      fetchProfileData();
-    };
+          setActiveChat(
+            parsedChat._id
+          );
+        } catch {
+          setActiveChat(
+            ""
+          );
+        }
+      };
+
+    const refreshProfile =
+      () => {
+        fetchProfileData();
+        fetchUsers();
+      };
 
     window.addEventListener(
       "storage",
@@ -194,28 +317,47 @@ function ChatList({
     };
   }, []);
 
-  const handleChatSelect = (chat) => {
-    setActiveChat(chat.id);
+  const handleChatSelect =
+    (
+      chat
+    ) => {
+      setActiveChat(
+        chat.id
+      );
 
-    localStorage.setItem(
-      SELECTED_CHAT_KEY,
-      JSON.stringify(chat.user)
-    );
+      localStorage.setItem(
+        SELECTED_CHAT_KEY,
+        JSON.stringify(
+          chat.user
+        )
+      );
 
-    window.dispatchEvent(new Event("chatUpdated"));
+      window.dispatchEvent(
+        new Event(
+          "chatUpdated"
+        )
+      );
 
-    onSelectChat?.(chat.user);
-  };
+      onSelectChat?.(
+        chat.user
+      );
+    };
 
-  const handleLogout = () => {
-    logoutUser();
+  const handleLogout =
+    () => {
+      logoutUser();
 
-    localStorage.removeItem(SELECTED_CHAT_KEY);
+      localStorage.removeItem(
+        SELECTED_CHAT_KEY
+      );
 
-    window.location.reload();
-  };
+      window.location.reload();
+    };
 
-  if (activePage === "profile") {
+  if (
+    activePage ===
+    "profile"
+  ) {
     return (
       <section className="flex h-[calc(100vh-3rem)] w-96 flex-col border-r border-orange-100 bg-[#FFF8F2]/85 px-6 py-6 shadow-sm backdrop-blur-md">
         <div className="border-b border-orange-100 pb-5">
@@ -236,7 +378,9 @@ function ChatList({
                 Assets.profile
               }
               alt="Profile"
-              onError={(e) => {
+              onError={(
+                e
+              ) => {
                 e.currentTarget.src =
                   Assets.profile;
               }}
@@ -244,15 +388,22 @@ function ChatList({
             />
 
             <h3 className="mt-4 text-lg font-bold text-gray-950">
-              {profileUser.fullName}
+              {
+                profileUser.fullName
+              }
             </h3>
 
             <p className="mt-1 text-sm font-semibold text-orange-600">
-              @{profileUser.username}
+              @
+              {
+                profileUser.username
+              }
             </p>
 
             <p className="mt-4 text-center text-sm font-medium leading-6 text-gray-600">
-              {profileUser.about}
+              {
+                profileUser.about
+              }
             </p>
           </div>
         )}
@@ -270,31 +421,43 @@ function ChatList({
         <button
           type="button"
           onClick={() =>
-            setMenuOpen(!menuOpen)
+            setMenuOpen(
+              !menuOpen
+            )
           }
           className="rounded-xl p-2 text-gray-800 transition duration-300 hover:bg-orange-100 hover:text-orange-600"
         >
-          <MoreVertical size={22} />
+          <MoreVertical
+            size={22}
+          />
         </button>
 
         {menuOpen && (
-          <div className="absolute right-0 top-11 z-20 w-48 overflow-hidden rounded-2xl border border-orange-100 bg-white py-2 shadow-xl">
-            <button className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-orange-50">
-              <UserPlus size={17} />
-              New Chat
+          <div className="absolute right-0 top-11 z-20 w-56 overflow-hidden rounded-2xl border border-orange-100 bg-white py-2 shadow-xl">
+            <button className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-gray-500 transition hover:bg-orange-50">
+              <UserPlus
+                size={17}
+              />
+              New Chat (Coming Soon)
             </button>
 
-            <button className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-orange-50">
-              <Settings size={17} />
-              Settings
+            <button className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-gray-500 transition hover:bg-orange-50">
+              <Settings
+                size={17}
+              />
+              Settings (Future Update)
             </button>
 
             <button
               type="button"
-              onClick={handleLogout}
+              onClick={
+                handleLogout
+              }
               className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-red-500 transition hover:bg-red-50"
             >
-              <LogOut size={17} />
+              <LogOut
+                size={17}
+              />
               Logout
             </button>
           </div>
@@ -310,8 +473,14 @@ function ChatList({
         <input
           type="text"
           value={search}
-          onChange={(event) =>
-            setSearch(event.target.value)
+          onChange={(
+            event
+          ) =>
+            setSearch(
+              event
+                .target
+                .value
+            )
           }
           placeholder="Search chats"
           className="w-full bg-transparent text-sm font-medium text-gray-900 placeholder:text-gray-500 focus:outline-none"
@@ -319,47 +488,79 @@ function ChatList({
       </div>
 
       <div className="mt-6 flex-1 space-y-2 overflow-y-auto pr-1">
-        {chats.map((chat) => (
-          <button
-            key={chat.id}
-            type="button"
-            onClick={() =>
-              handleChatSelect(chat)
-            }
-            className={`group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition duration-300 ${
-              activeChat === chat.id
-                ? "bg-orange-200/70 shadow-sm"
-                : "hover:bg-orange-100/80"
-            }`}
-          >
-            <img
-              src={chat.image}
-              alt={chat.name}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src =
-                  Assets.profile;
-              }}
-              className="h-12 w-12 rounded-full bg-gray-200 object-cover"
-            />
+        {chats.length >
+        0 ? (
+          chats.map(
+            (
+              chat
+            ) => (
+              <button
+                key={
+                  chat.id
+                }
+                type="button"
+                onClick={() =>
+                  handleChatSelect(
+                    chat
+                  )
+                }
+                className={`group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition duration-300 ${
+                  activeChat ===
+                  chat.id
+                    ? "bg-orange-200/70 shadow-sm"
+                    : "hover:bg-orange-100/80"
+                }`}
+              >
+                <img
+                  src={
+                    chat.image
+                  }
+                  alt={
+                    chat.name
+                  }
+                  onError={(
+                    e
+                  ) => {
+                    e.currentTarget.onerror =
+                      null;
 
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="truncate text-sm font-bold text-gray-950">
-                  {chat.name}
-                </h3>
+                    e.currentTarget.src =
+                      Assets.profile;
+                  }}
+                  className="h-12 w-12 rounded-full bg-gray-200 object-cover"
+                />
 
-                <span className="shrink-0 text-[11px] font-semibold text-gray-500">
-                  {chat.time}
-                </span>
-              </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="truncate text-sm font-bold text-gray-950">
+                      {
+                        chat.name
+                      }
+                    </h3>
 
-              <p className="mt-1 truncate text-xs font-medium text-gray-600">
-                {chat.message}
-              </p>
-            </div>
-          </button>
-        ))}
+                    <span className="shrink-0 text-[11px] font-semibold text-gray-500">
+                      {
+                        chat.time
+                      }
+                    </span>
+                  </div>
+
+                  <p className="mt-1 truncate text-xs font-medium text-gray-600">
+                    {
+                      chat.message
+                    }
+                  </p>
+                </div>
+              </button>
+            )
+          )
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <p className="text-sm font-medium text-gray-500">
+              No users found
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

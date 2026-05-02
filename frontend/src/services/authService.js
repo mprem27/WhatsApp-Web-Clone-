@@ -3,11 +3,7 @@ import api from "../api/api";
 const TOKEN_KEY = "whatsapp_clone_token";
 const USER_KEY = "whatsapp_clone_user";
 
-export const accessUser = async ({
-  emailOrUsername,
-  email,
-  password,
-}) => {
+export const accessUser = async ({ emailOrUsername, email, password }) => {
   const response = await api.post("/auth/access", {
     emailOrUsername,
     email,
@@ -19,11 +15,7 @@ export const accessUser = async ({
   }
 
   if (response.data.user) {
-    localStorage.setItem(
-      USER_KEY,
-      JSON.stringify(response.data.user)
-    );
-
+    localStorage.setItem(USER_KEY, JSON.stringify(response.data.user));
     window.dispatchEvent(new Event("profileUpdated"));
   }
 
@@ -33,6 +25,7 @@ export const accessUser = async ({
 export const logoutUser = () => {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  localStorage.removeItem("whatsapp_clone_selected_chat");
 
   window.dispatchEvent(new Event("profileUpdated"));
 };
@@ -51,7 +44,22 @@ export const getStoredUser = () => {
 };
 
 export const saveUser = (user) => {
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  if (!user) return;
+
+  const existingUser = getStoredUser();
+  const updatedUser = {
+    ...existingUser,
+    ...user,
+  };
+
+  localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+  window.dispatchEvent(new Event("profileUpdated"));
+};
+
+export const clearAuthData = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+  localStorage.removeItem("whatsapp_clone_selected_chat");
 
   window.dispatchEvent(new Event("profileUpdated"));
 };

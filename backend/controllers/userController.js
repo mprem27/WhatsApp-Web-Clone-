@@ -7,6 +7,20 @@ const escapeRegex = (text) => {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };
 
+const formatUserResponse = (user) => ({
+  _id: user._id,
+  username: user.username,
+  fullName: user.fullName,
+  email: user.email,
+  profileImage: user.profileImage,
+  about: user.about,
+  isProfileComplete: user.isProfileComplete,
+  isOnline: user.isOnline,
+  lastSeen: user.lastSeen,
+  createdAt: user.createdAt,
+  updatedAt: user.updatedAt,
+});
+
 export const completeProfile = async (req, res) => {
   try {
     const userId = getCurrentUserId(req);
@@ -50,7 +64,7 @@ export const completeProfile = async (req, res) => {
         isProfileComplete: true,
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       }
     ).select("-password");
@@ -65,7 +79,7 @@ export const completeProfile = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Profile completed successfully",
-      user: updatedUser,
+      user: formatUserResponse(updatedUser),
     });
   } catch (error) {
     return res.status(500).json({
@@ -82,15 +96,14 @@ export const getAllUsers = async (req, res) => {
 
     const users = await User.find({
       _id: { $ne: userId },
-      username: { $exists: true, $ne: null },
-      fullName: { $exists: true, $ne: null },
+      isProfileComplete: true,
     })
       .select("-password")
       .sort({ isOnline: -1, fullName: 1 });
 
     return res.status(200).json({
       success: true,
-      users,
+      users: users.map(formatUserResponse),
     });
   } catch (error) {
     return res.status(500).json({
@@ -104,7 +117,6 @@ export const getAllUsers = async (req, res) => {
 export const getUserProfile = async (req, res) => {
   try {
     const userId = getCurrentUserId(req);
-
     const user = await User.findById(userId).select("-password");
 
     if (!user) {
@@ -116,7 +128,7 @@ export const getUserProfile = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      user,
+      user: formatUserResponse(user),
     });
   } catch (error) {
     return res.status(500).json({
@@ -143,6 +155,7 @@ export const searchUsers = async (req, res) => {
 
     const users = await User.find({
       _id: { $ne: userId },
+      isProfileComplete: true,
       $or: [
         { username: { $regex: safeKeyword, $options: "i" } },
         { fullName: { $regex: safeKeyword, $options: "i" } },
@@ -154,7 +167,7 @@ export const searchUsers = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      users,
+      users: users.map(formatUserResponse),
     });
   } catch (error) {
     return res.status(500).json({
@@ -183,10 +196,14 @@ export const updateUserProfile = async (req, res) => {
       ...(about !== undefined && { about: about.trim() }),
     };
 
-    const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
-      new: true,
-      runValidators: true,
-    }).select("-password");
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updatedData,
+      {
+        returnDocument: "after",
+        runValidators: true,
+      }
+    ).select("-password");
 
     if (!updatedUser) {
       return res.status(404).json({
@@ -198,7 +215,7 @@ export const updateUserProfile = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      user: updatedUser,
+      user: formatUserResponse(updatedUser),
     });
   } catch (error) {
     return res.status(500).json({

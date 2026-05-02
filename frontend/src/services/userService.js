@@ -27,12 +27,20 @@ export const getUserProfile = async () => {
 
 export const getAllUsers = async () => {
   const response = await api.get("/users/all");
+
   return response.data;
 };
 
 export const searchUsers = async (query) => {
+  if (!query?.trim()) {
+    return {
+      success: true,
+      users: [],
+    };
+  }
+
   const response = await api.get(
-    `/users/search?q=${encodeURIComponent(query)}`
+    `/users/search?q=${encodeURIComponent(query.trim())}`
   );
 
   return response.data;

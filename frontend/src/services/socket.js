@@ -1,9 +1,9 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL || "http://localhost:4000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:4000";
 
 let socket = null;
+let joinedUserId = null;
 
 export const connectSocket = () => {
   if (!socket) {
@@ -21,6 +21,7 @@ export const connectSocket = () => {
 
     socket.on("disconnect", () => {
       console.log("Socket disconnected");
+      joinedUserId = null;
     });
 
     socket.on("connect_error", (error) => {
@@ -32,8 +33,9 @@ export const connectSocket = () => {
 };
 
 export const joinRoom = (userId) => {
-  if (!socket || !userId) return;
+  if (!socket || !userId || joinedUserId === userId) return;
 
+  joinedUserId = userId;
   socket.emit("joinRoom", userId);
 };
 
@@ -47,6 +49,7 @@ export const receiveSocketMessage = (callback) => {
   if (!socket || typeof callback !== "function") return;
 
   socket.off("receiveMessage");
+
   socket.on("receiveMessage", (messageData) => {
     callback(messageData);
   });
@@ -56,6 +59,7 @@ export const listenOnlineUsers = (callback) => {
   if (!socket || typeof callback !== "function") return;
 
   socket.off("onlineUsers");
+
   socket.on("onlineUsers", (users) => {
     callback(users);
   });
@@ -65,6 +69,7 @@ export const listenTyping = (callback) => {
   if (!socket || typeof callback !== "function") return;
 
   socket.off("typing");
+
   socket.on("typing", (data) => {
     callback(data);
   });
@@ -74,6 +79,7 @@ export const listenStopTyping = (callback) => {
   if (!socket || typeof callback !== "function") return;
 
   socket.off("stopTyping");
+
   socket.on("stopTyping", (data) => {
     callback(data);
   });
@@ -82,16 +88,19 @@ export const listenStopTyping = (callback) => {
 export const sendTyping = ({ senderId, receiverId }) => {
   if (!socket || !senderId || !receiverId) return;
 
-  socket.emit("typing", { senderId, receiverId });
+  socket.emit("typing", {
+    senderId,
+    receiverId,
+  });
 };
 
-export const sendStopTyping = ({
-  senderId,
-  receiverId,
-}) => {
+export const sendStopTyping = ({ senderId, receiverId }) => {
   if (!socket || !senderId || !receiverId) return;
 
-  socket.emit("stopTyping", { senderId, receiverId });
+  socket.emit("stopTyping", {
+    senderId,
+    receiverId,
+  });
 };
 
 export const removeSocketListeners = () => {
@@ -108,7 +117,15 @@ export const disconnectSocket = () => {
     removeSocketListeners();
     socket.disconnect();
     socket = null;
+    joinedUserId = null;
   }
+};
+
+export const reconnectCurrentUser = (userId) => {
+  if (!userId) return;
+
+  connectSocket();
+  joinRoom(userId);
 };
 
 export const getSocket = () => socket;
