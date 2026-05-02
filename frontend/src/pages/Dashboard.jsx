@@ -9,13 +9,12 @@ function Dashboard() {
   const [activePage, setActivePage] = useState("chats");
 
   return (
-    <div className="flex h-[calc(100vh-48px)] w-full bg-orange-50">
-      <Sidebar
-        activePage={activePage}
-        onNavigate={setActivePage}
-      />
+    // FIXED: Added pl-16 to push the chat panels to the right, out from under the fixed Sidebar
+    <div className="flex h-[calc(100vh-48px)] w-full bg-orange-50 overflow-hidden pl-16">
+      <Sidebar activePage={activePage} onNavigate={setActivePage} />
 
-      <div className="w-full max-w-sm">
+      {/* Panel 1: Chat List */}
+      <div className="w-full max-w-sm border-r border-orange-200 bg-white flex flex-col overflow-hidden">
         <ChatList
           selectedChat={selectedChat}
           onSelectChat={setSelectedChat}
@@ -23,11 +22,10 @@ function Dashboard() {
         />
       </div>
 
-      <div className="flex-1">
+      {/* Panel 2: Active Chat Window or Profile */}
+      <div className="flex-1 flex h-full min-w-0 flex-col overflow-hidden">
         {activePage === "profile" ? (
-          <UserProfile
-            onBack={() => setActivePage("chats")}
-          />
+          <UserProfile onBack={() => setActivePage("chats")} />
         ) : (
           <ChatWindow selectedChat={selectedChat} />
         )}

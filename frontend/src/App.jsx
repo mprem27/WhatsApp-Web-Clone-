@@ -2,7 +2,6 @@ import "./App.css";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
-import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 
 import AuthPage from "./pages/AuthPage";
@@ -34,11 +33,10 @@ function ProfileSetupLayout() {
 
 function DashboardLayout() {
   return (
-    <div className="min-h-screen bg-orange-100">
+    <div className="min-h-screen bg-orange-100 overflow-hidden">
       <Navbar />
-      <Sidebar activePage="chats" onNavigate={() => {}} />
-
-      <main className="min-h-screen pl-16 pt-12">
+      
+      <main className="pt-12">
         <Dashboard />
       </main>
     </div>
