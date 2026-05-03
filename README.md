@@ -3,7 +3,7 @@
     -This Project is a full-Stack WhatsApp Web Clone developed as part of Humbletree Internship Assignment.
     -It includes user authentication,profile-setup, real-time messaging,MongoDb storage, and a Professional WhatsApp web-like interface.
 
-## Who it Works/Workingflow
+## How it Works/Workingflow
 
     -Sign up/Login with Email or username and a password (This one the combined flow /uses a single access flow. Existing users will log in directly. New users can enter email or username with a password to start account access)
 
