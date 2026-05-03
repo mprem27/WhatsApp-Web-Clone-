@@ -93,15 +93,33 @@ WhatsApp-Web-Clone-/
 ### Environment Variables Setup
     -Create a ".env" file inside the "backend" folder with this:
 
-        MONGODB_URI='mongodb+srv://malepatipremkumarreddy:Mpremkreddy@eccomerce.sgqwrhn.mongodb.net/Whatsappclone?retryWrites=true&w=majority'
+        MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/Whatsappclone 
         PORT=4000
-        JWT_SECRET="whatsapp_clone_secure_auth_2026_random_key"
-        JWT_EXPIRES_IN='7d'
-        FRONTEND_URL='http://localhost:5173'
-        CLOUDINARY_NAME ="dnhr3cp1r"
-        CLOUDINARY_API_KEY="726433579735644"
-        CLOUDINARY_SECRET_KEY="YRTEwi7xGtxoflg0ilLKgVoUwso"
+        JWT_SECRET=any_long_random_string_you_want
+        JWT_EXPIRES_IN=7d
+        FRONTEND_URL=http://localhost:5173
+        CLOUDINARY_NAME=your_cloudinary_cloud_name
+        CLOUDINARY_API_KEY=your_cloudinary_api_key
+        CLOUDINARY_SECRET_KEY=your_cloudinary_api_secret
 
+### Environment Variables Explanation
+    -MONGODB_URI ="Connection string for the database"."In the Free MongoDB Atlas account go to Connect click on the Drivers then copy the URI"
+
+    -PORT ="Port the backend listens on Any free port"
+
+    -JWT_SECRET="Secret used to sign JWT tokens.Any long random string"
+
+    -JWT_EXPIRES_IN="Token Exprires timeLine (lifetime) "
+
+    -FRONTEND_URL="http://localhost:5173 for local dev"
+
+    -CLOUDINARY_NAME="Cloudinary cloud name"."That is Available in the Cloudinary dashboard, At top-right account info"
+
+    -CLOUDINARY_API_KEY="Cloudinary API key that will be there in Cloudinary go to Settings and then API Keys"
+    
+    -CLOUDINARY_SECRET_KEY="Cloudinary API secret that will in the same place where the Cloudinary API key found or showen"
+
+        
 ### Then start it:
     npm start
     
@@ -123,4 +141,5 @@ WhatsApp-Web-Clone-/
 ### Then Run:
     npm run dev
         -Open http://localhost:5173 in the browser.
+
 
