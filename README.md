@@ -93,14 +93,15 @@ WhatsApp-Web-Clone-/
 ### Environment Variables Setup
     -Create a ".env" file inside the "backend" folder with this:
 
-        MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/Whatsappclone 
+        MONGODB_URI='mongodb+srv://malepatipremkumarreddy:Mpremkreddy@eccomerce.sgqwrhn.mongodb.net/Whatsappclone?retryWrites=true&w=majority'
         PORT=4000
-        JWT_SECRET=any_long_random_string_you_want
-        JWT_EXPIRES_IN=7d
-        FRONTEND_URL=http://localhost:5173
-        CLOUDINARY_NAME=your_cloudinary_cloud_name
-        CLOUDINARY_API_KEY=your_cloudinary_api_key
-        CLOUDINARY_SECRET_KEY=your_cloudinary_api_secret
+        JWT_SECRET="whatsapp_clone_secure_auth_2026_random_key"
+        JWT_EXPIRES_IN='7d'
+        FRONTEND_URL='http://localhost:5173'
+        CLOUDINARY_NAME ="dnhr3cp1r"
+        CLOUDINARY_API_KEY="726433579735644"
+        CLOUDINARY_SECRET_KEY="YRTEwi7xGtxoflg0ilLKgVoUwso"
+
 
 ### Environment Variables Explanation
     -MONGODB_URI ="Connection string for the database"."In the Free MongoDB Atlas account go to Connect click on the Drivers then copy the URI"
